@@ -3,21 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Telegram Mini App</title>
+  <title>Smart Kasb App</title>
 
   <link rel="stylesheet" href="style.css">
-
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
   <div class="container">
     <h1>أهلاً بك</h1>
-    <p>هذا أول Telegram Mini App خاص بك</p>
+    <p>شاهد الإعلانات واجمع النقاط</p>
 
-    <button id="btn">اضغط هنا</button>
+    <p class="points-box">
+      النقاط: <span id="points">0</span>
+    </p>
+
+    <button class="reward-btn" onclick="watchAd()">
+      🎁 شاهد إعلان واربح 10 نقاط
+    </button>
+
+    <button class="popup-btn" onclick="watchPopup()">
+      💬 نافذة مكافأة
+    </button>
   </div>
 
+  <div id="rewardModal" class="modal">
+    <div class="modal-content">
+      <h2>🎁 مكافأة إضافية</h2>
+      <p>شاهد الإعلان لتحصل على 10 نقاط</p>
+
+      <button class="reward-btn" onclick="watchAd()">
+        مشاهدة الإعلان
+      </button>
+
+      <button class="close-btn" onclick="closePopup()">
+        إغلاق
+      </button>
+    </div>
+  </div>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

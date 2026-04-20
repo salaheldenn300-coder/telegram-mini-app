@@ -1,25 +1,78 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #1e1e1e;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  padding: 0;
   direction: rtl;
+  font-family: Arial, sans-serif;
+  background: #111827;
+  color: #fff;
 }
 
 .container {
+  max-width: 400px;
+  margin: 60px auto;
   text-align: center;
+  padding: 20px;
 }
 
-button {
-  background: #0088cc;
-  color: white;
+h1 {
+  margin-bottom: 10px;
+}
+
+.points-box {
+  background: #1f2937;
+  padding: 15px;
+  border-radius: 12px;
+  margin: 20px 0;
+  font-size: 20px;
+}
+
+.reward-btn,
+.popup-btn,
+.close-btn {
   border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-size: 18px;
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin: 10px 0;
+  font-size: 16px;
   cursor: pointer;
+  width: 100%;
+}
+
+.reward-btn {
+  background: #22c55e;
+  color: white;
+}
+
+.reward-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.popup-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.close-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #1f2937;
+  padding: 25px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 350px;
+  text-align: center;
 }
