@@ -1,3 +1,6 @@
+// =========================
+// Firebase Config
+// =========================
 const firebaseConfig = {
   apiKey: "AIzaSyBWpgOD-N-u-WX0bJ_6yX09JIrQ4iazrA0",
   authDomain: "smart-kasb.firebaseapp.com",
@@ -10,100 +13,126 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// =========================
+// Ad Link (غيره لاحقًا لو حبيت)
+// =========================
 const monetagLink = "https://omg10.com/4/10859582";
 
+// =========================
+// User Data
+// =========================
 let points = 0;
 let userId = "guest";
 let sessionAds = 0;
 const maxAdsPerSession = 5;
 
+// Telegram User ID
 if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe?.user) {
   userId = String(Telegram.WebApp.initDataUnsafe.user.id);
 }
 
-async function loadPoints() {
-  const docRef = db.collection("users").doc(userId);
-  const docSnap = await docRef.get();
+// =========================
+// Load User Data
+// =========================
+async function loadUser() {
+  const ref = db.collection("users").doc(userId);
+  const snap = await ref.get();
 
-  if (docSnap.exists) {
-    points = docSnap.data().points || 0;
-  } else {
-    await docRef.set({
+  const today = new Date().toDateString();
+
+  if (!snap.exists) {
+    await ref.set({
       points: 0,
+      adsToday: 0,
+      lastReset: today,
       lastAdTime: 0
     });
-    points = 0;
+  } else {
+    const data = snap.data();
+
+    // reset daily limit
+    if (data.lastReset !== today) {
+      await ref.update({
+        adsToday: 0,
+        lastReset: today
+      });
+    }
   }
 
-  document.getElementById("points").textContent = points;
-}
-
-loadPoints();
-
-function watchPopup() {
-  document.getElementById("rewardModal").style.display = "flex";
-}
-
-function closePopup() {
-  document.getElementById("rewardModal").style.display = "none";
-}
-
-async function addPoints(amount) {
-  points += amount;
+  const updated = await ref.get();
+  points = updated.data().points || 0;
 
   document.getElementById("points").textContent = points;
-
-  await db.collection("users").doc(userId).update({
-    points: points,
-    lastAdTime: Date.now()
-  });
 }
 
-async function watchAd() {
+loadUser();
+
+// =========================
+// Watch Ad
+// =========================
+function watchAd() {
   if (sessionAds >= maxAdsPerSession) {
-  alert("لقد وصلت للحد المسموح اليوم، حاول لاحقًا");
-  return;
-}
+    alert("وصلت للحد المسموح اليوم");
+    return;
+  }
 
-sessionAds++;
+  sessionAds++;
 
-  const btns = document.querySelectorAll(".reward-btn");
+  // mark pending reward
+  localStorage.setItem("pendingReward", "true");
 
-  btns.forEach(btn => {
-    btn.disabled = true;
-    btn.innerText = "جارٍ فتح الإعلان...";
-  });
-
+  // open ad
   if (window.Telegram && Telegram.WebApp) {
     Telegram.WebApp.openLink(monetagLink);
   } else {
     window.open(monetagLink, "_blank");
   }
 
-  setTimeout(async () => {
-    try {
-      points += 10;
+  alert("بعد ما تخلص الإعلان اضغط 'استلام المكافأة'");
+}
 
-      document.getElementById("points").textContent = points;
+// =========================
+// Claim Reward (safe system)
+// =========================
+async function claimReward() {
+  const pending = localStorage.getItem("pendingReward");
 
-      await db.collection("users").doc(userId).update({
-        points: points,
-        lastAdTime: Date.now()
-      });
+  if (!pending) {
+    alert("لا يوجد إعلان مكتمل");
+    return;
+  }
 
-      closePopup();
+  const ref = db.collection("users").doc(userId);
+  const snap = await ref.get();
+  const data = snap.data();
 
-      alert("تمت إضافة 10 نقاط بنجاح");
+  if (data.adsToday >= maxAdsPerSession) {
+    alert("وصلت للحد اليومي");
+    return;
+  }
 
-    } catch (error) {
-      console.error(error);
-      alert("حدث خطأ أثناء حفظ النقاط");
-    }
+  points += 10;
 
-    btns.forEach(btn => {
-      btn.disabled = false;
-      btn.innerText = "🎁 شاهد إعلان واربح 10 نقاط";
-    });
+  await ref.update({
+    points: points,
+    adsToday: data.adsToday + 1,
+    lastAdTime: Date.now()
+  });
 
-  }, 10000);
+  document.getElementById("points").textContent = points;
+
+  localStorage.removeItem("pendingReward");
+
+  alert("تم إضافة 10 نقاط");
+}
+
+// =========================
+// UI Helpers
+// =========================
+function watchPopup() {
+  document.getElementById("rewardModal").style.display = "flex";
+}
+
+function closePopup() {
+  document.getElementById("rewardModal").style.display = "none";
 }
